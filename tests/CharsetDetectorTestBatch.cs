@@ -6,6 +6,7 @@
 //
 
 using System.IO;
+using System.Linq;
 using UtfUnknown.Core;
 using Xunit;
 
@@ -91,8 +92,8 @@ namespace UtfUnknown.Tests
 
                 var result = CharsetDetector.DetectFromFile(file);
                 var detected = result.Detected;
-                
-                Assert.True(charset == detected.EncodingName, $"Charset detection failed for {file}. Expected: {charset}, detected: {detected.EncodingName} ({detected.Confidence * 100}% confidence)");
+               
+                Assert.True(charset == detected.EncodingName, $"Charset detection failed for {file}. Expected: {charset}, detected: {detected.EncodingName} ({detected.Confidence * 100}% confidence). All details: {result}");
 
             }
         }

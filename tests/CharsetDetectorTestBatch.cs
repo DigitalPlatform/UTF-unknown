@@ -2,6 +2,7 @@
 //
 // Author:
 //    Rudi Pettazzi <rudi.pettazzi@gmail.com>
+//    J. Verdurmen   
 //
 
 using System.IO;
@@ -14,7 +15,7 @@ namespace UtfUnknown.Tests
     public class CharsetDetectorTestBatch
     {
         // Path.GetDirectoryName (Assembly.GetExecutingAssembly ().Location)
-        const string DATA_ROOT = "../../Data";
+        const string DATA_ROOT = "../../../Data";
 
 
 
@@ -27,7 +28,7 @@ namespace UtfUnknown.Tests
         [Fact]
         public void TestCJK()
         {
-            Process(Charsets.GB18030, "gb18030");
+            Process(Charsets.GB18030, "gb18030"); 
             Process(Charsets.BIG5, "big5");
             Process(Charsets.SHIFT_JIS, "shiftjis");
             Process(Charsets.EUCJP, "eucjp");
@@ -47,7 +48,7 @@ namespace UtfUnknown.Tests
         public void TestGreek()
         {
             Process(Charsets.ISO_8859_7, "iso88597");
-            //Process(Charsets.WIN1253, "windows1253");
+         //todo broken   Process(Charsets.WIN1253, "windows1253");
         }
 
         [Fact]
@@ -71,10 +72,18 @@ namespace UtfUnknown.Tests
         private static void Process(string charset, string dirname)
         {
             string path = Path.Combine(DATA_ROOT, dirname);
-            if (!Directory.Exists(path))
-                return;
+            var dirInfo = new DirectoryInfo(path);
+            if (!dirInfo.Exists)
+            {
+                Assert.True(false, $"dir {dirInfo.FullName} for {charset} is missing");
+            }
 
             string[] files = Directory.GetFiles(path);
+
+            if (files.Length == 0)
+            {
+                Assert.True(false, $"no files for charset {charset}");
+            }
 
             foreach (string file in files)
             {
@@ -82,7 +91,8 @@ namespace UtfUnknown.Tests
 
                 var result = CharsetDetector.DetectFromFile(file);
                 var detected = result.Detected;
-                Assert.True(charset == detected.EncodingName, string.Format("Charset detection failed for {0}. Expected: {1}, detected: {2} ({3}% confidence)", file, charset, detected.EncodingName, detected.Confidence * 100));
+                
+                Assert.True(charset == detected.EncodingName, $"Charset detection failed for {file}. Expected: {charset}, detected: {detected.EncodingName} ({detected.Confidence * 100}% confidence)");
 
             }
         }
